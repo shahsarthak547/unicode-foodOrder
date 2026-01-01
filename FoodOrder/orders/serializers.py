@@ -2,18 +2,11 @@ from rest_framework import serializers
 from .models import Order, OrderItem
 from restaurants.models import MenuItem
 
-
-# ----------------------------
-# Order Item (CREATE)
-# ----------------------------
 class OrderItemCreateSerializer(serializers.Serializer):
     menu_item_id = serializers.IntegerField()
     quantity = serializers.IntegerField(min_value=1)
 
 
-# ----------------------------
-# Order (CREATE)
-# ----------------------------
 class OrderCreateSerializer(serializers.Serializer):
     table_number = serializers.CharField()
     phone_number = serializers.CharField(required=False, allow_blank=True)
@@ -47,10 +40,6 @@ class OrderCreateSerializer(serializers.Serializer):
 
         return order
 
-
-# ----------------------------
-# Order Item (READ)
-# ----------------------------
 class OrderItemSerializer(serializers.ModelSerializer):
     menu_item_name = serializers.CharField(
         source='menu_item.name',
@@ -68,9 +57,6 @@ class OrderItemSerializer(serializers.ModelSerializer):
         ]
 
 
-# ----------------------------
-# Order (READ / STATUS)
-# ----------------------------
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
 

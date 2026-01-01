@@ -31,8 +31,6 @@ export default function MenuPage() {
   return (
     <div className="max-w-md mx-auto min-h-screen pb-32
       bg-gradient-to-br from-[#0f2027] via-[#203a43] to-[#2c5364] text-red-50">
-
-      {/* 🌟 HEADER */}
       <div className="sticky top-0 z-20 backdrop-blur-md bg-white/10 border-b border-white/10">
         <div className="px-4 py-4">
           <h1 className="text-2xl font-bold text-gray-900">
@@ -45,8 +43,6 @@ export default function MenuPage() {
       </div>
 
       <div className="p-4 space-y-8">
-
-        {/* 🔥 BESTSELLERS */}
         {bestsellerItems.length > 0 && (
           <div>
             <h2 className="text-xl font-semibold mb-3">🔥 Crowd Favorites</h2>
@@ -104,8 +100,6 @@ export default function MenuPage() {
             </div>
           </div>
         )}
-
-        {/* 🍽 MENU BY CATEGORY */}
         {menuData.menu.map((category) => (
           <div key={category.id}>
             <h2 className="text-xl font-semibold mb-4 border-l-4 border-green-400 pl-3">
@@ -128,7 +122,6 @@ export default function MenuPage() {
                     hover:bg-white/20 transition"
                 >
                   <div className="flex gap-4">
-                    {/* LEFT */}
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-lg">
@@ -178,8 +171,6 @@ export default function MenuPage() {
                         </button>
                       </div>
                     </div>
-
-                    {/* RIGHT IMAGE */}
                     {item.image && (
                       <img
                         src={item.image}
@@ -194,8 +185,6 @@ export default function MenuPage() {
           </div>
         ))}
       </div>
-
-      {/* 🛒 FLOATING CART */}
       {cart.length > 0 && (
         <div className="fixed bottom-4 left-4 right-4 z-30">
           <div className="max-w-md mx-auto

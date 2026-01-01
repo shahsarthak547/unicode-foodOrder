@@ -16,8 +16,6 @@ export default function OrderSuccess() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="bg-white rounded-xl shadow-md p-6 max-w-md w-full text-center">
-
-        {/* Animated Check */}
         <div className="text-green-600 text-5xl mb-4 animate-bounce">
           ✅
         </div>
@@ -38,8 +36,6 @@ export default function OrderSuccess() {
             <span className="font-semibold">Estimated Time:</span> 15–20 mins
           </p>
         </div>
-
-        {/* Progress dots */}
         <div className="flex justify-center gap-2 mb-4">
           <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span>
           <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>

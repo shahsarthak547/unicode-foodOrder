@@ -59,7 +59,6 @@ export default function OrderStatusPage() {
           text-center
         "
       >
-        {/* 🧭 STEP INDICATOR */}
         <div className="flex justify-between items-center mb-10 relative">
           {steps.map((step, index) => (
             <div key={index} className="flex-1 relative">
@@ -95,7 +94,6 @@ export default function OrderStatusPage() {
 
         {status === "PENDING" ? (
           <>
-            {/* 🍳 COOKING STATE */}
             <div className="flex justify-center mb-6">
               <div className="
                 w-16 h-16 rounded-full
@@ -114,8 +112,6 @@ export default function OrderStatusPage() {
             <p className="text-gray-600 leading-relaxed mb-6">
               Please relax at your table while we cook
             </p>
-
-            {/* ⏳ PROGRESS BAR */}
             <div className="w-full bg-[#cfd8e3] rounded-full h-[6px] overflow-hidden mb-2">
               <div className="h-full w-2/3 bg-teal-600 rounded-full animate-pulse" />
             </div>
@@ -126,7 +122,6 @@ export default function OrderStatusPage() {
           </>
         ) : (
           <>
-            {/* ✅ READY STATE */}
             <div className="flex justify-center mb-6">
               <div className="
                 w-16 h-16 rounded-full
@@ -151,8 +146,6 @@ export default function OrderStatusPage() {
             </p>
           </>
         )}
-
-        {/* 🧾 ORDER INFO */}
         <div className="mt-10 pt-4 border-t border-gray-300/40">
           <p className="text-xs text-gray-500">Order ID</p>
           <p className="font-semibold text-gray-800">

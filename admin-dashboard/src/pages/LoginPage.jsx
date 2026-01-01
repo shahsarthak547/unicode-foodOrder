@@ -23,11 +23,9 @@ export default function LoginPage() {
       alert("Invalid credentials");
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center px-4
       bg-gradient-to-b from-[#eef2f7] via-[#e6ebf3] to-[#dbe3ee]">
-
       <div
         className="
           w-full max-w-sm
@@ -36,7 +34,6 @@ export default function LoginPage() {
           shadow-[0_30px_60px_rgba(0,0,0,0.18)]
         "
       >
-        {/* 🔐 HEADER */}
         <div className="mb-6 text-center">
           <div className="flex justify-center mb-4">
             <div className="
@@ -47,7 +44,6 @@ export default function LoginPage() {
               <span className="text-2xl">🔐</span>
             </div>
           </div>
-
           <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">
             Staff Login
           </h2>
@@ -55,8 +51,6 @@ export default function LoginPage() {
             Authorized access only
           </p>
         </div>
-
-        {/* 👤 USERNAME */}
         <div className="mb-4">
           <label className="text-xs font-semibold text-gray-700">
             Username
@@ -73,8 +67,6 @@ export default function LoginPage() {
             onChange={(e) => setUsername(e.target.value)}
           />
         </div>
-
-        {/* 🔑 PASSWORD */}
         <div className="mb-6">
           <label className="text-xs font-semibold text-gray-700">
             Password
@@ -92,8 +84,6 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-
-        {/* 🚀 LOGIN BUTTON */}
         <button
           onClick={handleLogin}
           className="
@@ -105,8 +95,6 @@ export default function LoginPage() {
         >
           Login →
         </button>
-
-        {/* 🧾 FOOTER */}
         <p className="text-xs text-gray-500 text-center mt-6">
           © Restaurant Staff Panel
         </p>

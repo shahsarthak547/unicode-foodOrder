@@ -70,8 +70,6 @@ export default function CartPage() {
   return (
     <div className="max-w-md mx-auto min-h-screen pb-32
       bg-gradient-to-br from-[#0f2027] via-[#203a43] to-[#2c5364] text-red-50">
-
-      {/* 🧾 HEADER */}
       <div className="ssticky top-0 z-20 backdrop-blur-md bg-white/10 border-b border-white/10">
         <div className="px-4 py-4">
           <h1 className="text-2xl font-bold text-gray-900">
@@ -84,8 +82,6 @@ export default function CartPage() {
       </div>
 
       <div className="p-4 space-y-6">
-
-        {/* 🛍 CART ITEMS */}
         {cart.map(item => (
           <div
             key={item.id}
@@ -140,8 +136,6 @@ export default function CartPage() {
             </div>
           </div>
         ))}
-
-        {/* 📱 PHONE INPUT */}
         <div className="p-6 rounded-3xl
           bg-[#e8edf4]
           shadow-[0_12px_30px_rgba(0,0,0,0.12)]">
@@ -165,8 +159,6 @@ export default function CartPage() {
           />
         </div>
       </div>
-
-      {/* 🚀 PLACE ORDER BAR */}
       <div className="fixed bottom-4 left-4 right-4 z-30">
         <div className="max-w-md mx-auto
           bg-[#dde5ef]

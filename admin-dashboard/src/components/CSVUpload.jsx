@@ -1,4 +1,4 @@
-import { uploadCSV } from "../api/adminAPI";
+import { uploadCSV } from "../api/adminApi";
 import { useAuth } from "../auth/AuthContext";
 
 export default function CSVUpload({ onSuccess }) {

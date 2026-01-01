@@ -5,7 +5,7 @@ import {
   updateMenuItem,
   deleteMenuItem,
   uploadCSV,
-} from "../api/adminAPI";
+} from "../api/adminApi";
 
 export default function MenuManagementPage() {
   const [menu, setMenu] = useState([]);
@@ -21,8 +21,6 @@ export default function MenuManagementPage() {
 
   const [editingId, setEditingId] = useState(null);
   const [csvFile, setCsvFile] = useState(null);
-
-  /* ================= FETCH MENU ================= */
   const fetchMenu = async () => {
     try {
       const res = await getMenu();
@@ -37,8 +35,6 @@ export default function MenuManagementPage() {
   useEffect(() => {
     fetchMenu();
   }, []);
-
-  /* ================= ADD / UPDATE ================= */
   const handleSubmit = async () => {
     if (!form.name || !form.price || !form.category) {
       alert("Name, price & category are required");
@@ -51,10 +47,8 @@ export default function MenuManagementPage() {
     formData.append("price", Number(form.price));
     formData.append("category", Number(form.category));
 
-    // 🔥 CRITICAL: always keep item visible for customers
     formData.append("is_available", "true");
 
-    // 🔥 Only send image if selected
     if (form.image instanceof File) {
       formData.append("image", form.image);
     }
@@ -80,7 +74,6 @@ export default function MenuManagementPage() {
     }
   };
 
-  /* ================= EDIT ================= */
   const handleEdit = (item) => {
     setEditingId(item.id);
     setForm({
@@ -88,11 +81,10 @@ export default function MenuManagementPage() {
       description: item.description || "",
       price: item.price,
       category: item.category,
-      image: null, // keep old image unless replaced
+      image: null,
     });
   };
 
-  /* ================= DELETE ================= */
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this item?")) return;
 
@@ -104,7 +96,7 @@ export default function MenuManagementPage() {
     }
   };
 
-  /* ================= CSV ================= */
+
   const handleCSVUpload = async () => {
     if (!csvFile) {
       alert("Select a CSV file");
@@ -128,7 +120,6 @@ export default function MenuManagementPage() {
     <div className="p-6 max-w-6xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Menu Management</h1>
 
-      {/* ================= ADD / EDIT FORM ================= */}
       <div className="bg-white p-4 rounded-xl shadow mb-8">
         <h2 className="font-semibold mb-3">
           {editingId ? "Edit Item" : "Add New Item"}
@@ -191,7 +182,6 @@ export default function MenuManagementPage() {
         </button>
       </div>
 
-      {/* ================= CSV UPLOAD ================= */}
       <div className="bg-white p-4 rounded-xl shadow mb-8">
         <h2 className="font-semibold mb-3">Bulk Upload (CSV)</h2>
 
@@ -210,7 +200,6 @@ export default function MenuManagementPage() {
         </div>
       </div>
 
-      {/* ================= MENU LIST ================= */}
       <div className="space-y-4">
         {menu.length === 0 ? (
           <p className="text-gray-500">No menu items</p>

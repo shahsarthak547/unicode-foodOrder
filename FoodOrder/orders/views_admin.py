@@ -9,10 +9,6 @@ from accounts.permissions import IsRestaurantStaff
 
 
 class AdminOrderListView(generics.ListAPIView):
-    """
-    GET /admin/orders/
-    List all orders belonging to logged-in staff's restaurant.
-    """
     serializer_class = OrderSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsRestaurantStaff]
@@ -23,17 +19,12 @@ class AdminOrderListView(generics.ListAPIView):
 
 
 class AdminOrderUpdateView(generics.UpdateAPIView):
-    """
-    PUT /admin/orders/<order_id>/
-    Update order status: PENDING, IN_PROGRESS, COMPLETED, CANCELLED.
-    """
     serializer_class = OrderSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsRestaurantStaff]
     lookup_url_kwarg = 'order_id'
 
     def get_queryset(self):
-        # Only orders of the staff's restaurant
         return Order.objects.filter(restaurant=self.request.user.restaurant)
 
     def update(self, request, *args, **kwargs):

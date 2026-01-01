@@ -25,7 +25,6 @@ class RestaurantMenuView(APIView):
             "restaurant": restaurant.name,
             "menu": []
         }
-        # 1️⃣ Get categories
         categories = MenuCategory.objects.filter(restaurant=restaurant)
 
         for category in categories:
@@ -34,8 +33,6 @@ class RestaurantMenuView(APIView):
                 category=category,
                 is_available=True
             )
-
-            # ✅ SERIALIZE WITH REQUEST CONTEXT
             items_serializer = MenuItemSerializer(
                 items_qs,
                 many=True,
@@ -47,8 +44,6 @@ class RestaurantMenuView(APIView):
                 "name": category.name,
                 "items": items_serializer.data
             })
-
-        # 2️⃣ Uncategorized → Others
         uncategorized_qs = MenuItem.objects.filter(
             restaurant=restaurant,
             category__isnull=True,
@@ -87,5 +82,4 @@ class RestaurantDetailView(APIView):
             "id": restaurant.id,
             "name": restaurant.name,
             "tagline": getattr(restaurant, "tagline", ""),
-            # "logo": restaurant.logo.url if getattr(restaurant, "logo", None) else None
         })

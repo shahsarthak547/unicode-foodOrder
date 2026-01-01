@@ -63,8 +63,6 @@ export default function QRGeneratorPage() {
             onChange={(e) => setTableNumber(e.target.value)}
           />
         </div>
-
-        {/* QR Preview */}
         {menuUrl && (
           <div className="flex flex-col items-center gap-4 pt-4">
             <QRCodeCanvas
@@ -98,8 +96,6 @@ export default function QRGeneratorPage() {
             </div>
           </div>
         )}
-
-        {/* Empty State */}
         {!menuUrl && (
           <div className="text-center text-gray-400 text-sm py-6">
             Enter Restaurant ID and Table Number to generate QR

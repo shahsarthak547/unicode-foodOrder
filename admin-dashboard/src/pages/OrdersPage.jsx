@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getOrders, updateOrderStatus } from "../api/adminAPI";
+import { getOrders, updateOrderStatus } from "../api/adminApi";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -52,8 +52,6 @@ export default function OrdersPage() {
       px-4 py-6">
 
       <div className="max-w-6xl mx-auto">
-
-        {/* 🧾 HEADER */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
@@ -80,8 +78,6 @@ export default function OrdersPage() {
             <option value="completed">Completed</option>
           </select>
         </div>
-
-        {/* 📭 EMPTY STATE */}
         {filteredOrders.length === 0 ? (
           <div className="flex flex-col items-center justify-center
             bg-[#e8edf4]
@@ -119,7 +115,6 @@ export default function OrdersPage() {
                       : "bg-[#e7f5ec] border-l-8 border-green-500"}
                   `}
                 >
-                  {/* 🆔 HEADER */}
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h2 className="text-xl font-bold text-gray-900">
@@ -141,8 +136,6 @@ export default function OrdersPage() {
                       {order.status}
                     </span>
                   </div>
-
-                  {/* 🍽 ITEMS */}
                   <div className="space-y-2 mb-4">
                     {order.items.map((item) => (
                       <div
@@ -158,8 +151,6 @@ export default function OrdersPage() {
                       </div>
                     ))}
                   </div>
-
-                  {/* 💰 TOTAL + ACTION */}
                   <div className="flex justify-between items-center">
                     <p className="text-lg font-bold text-gray-900">
                       Total: ₹{total}
