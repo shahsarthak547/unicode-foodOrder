@@ -26,16 +26,16 @@ SECRET_KEY = 'django-insecure-9ziv*k^rcs!u^z2e%pl0y_pwzalf-&hk)r1tqt4tf9*h5+nm0e
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    # 'localhost',
-    # '.ngrok-free.app',
-    # '.ngrok-free.dev',
-    # '127.0.0.1',
+    'localhost',
+    '127.0.0.1',
 ]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -58,6 +58,7 @@ REST_FRAMEWORK = {
 
 AUTH_USER_MODEL = 'accounts.User'
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -65,10 +66,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'FoodOrder.urls'
@@ -89,7 +86,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'FoodOrder.wsgi.application'
+ASGI_APPLICATION = 'FoodOrder.asgi.application'
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -140,7 +143,7 @@ STATIC_URL = 'static/'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",
-    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8000",
 #     "https://perceptible-turbanless-burl.ngrok-free.dev",
 #     "https://perceptible-turbanless-burl.ngrok-free.app",
 ]

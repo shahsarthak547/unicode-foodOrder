@@ -8,5 +8,5 @@ from .views_admin import (
 urlpatterns = [
     path('menu/', AdminMenuListCreateView.as_view()),
     path('menu/<int:pk>/', AdminMenuUpdateDeleteView.as_view()),
-    path('menu/upload-csv/', AdminMenuCSVUploadView.as_view()),
+    path('menu/csv-upload/', AdminMenuCSVUploadView.as_view()),
 ]

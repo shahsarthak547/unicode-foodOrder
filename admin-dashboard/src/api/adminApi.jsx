@@ -47,3 +47,11 @@ export const uploadCSV = (file) => {
 
   return api.post("/admin/menu/csv-upload/", formData);
 };
+
+export const getAnalytics = (restaurantId) => {
+  return api.get(`/api/restaurants/${restaurantId}/analytics/`);
+};
+
+export const verifyPayment = (orderId) => {
+  return api.patch(`/api/orders/${orderId}/verify/`);
+};

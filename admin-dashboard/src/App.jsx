@@ -5,6 +5,8 @@ import PrivateRoute from "./routes/PrivateRoute";
 import { useAuth } from "./auth/AuthContext";
 import MenuManagementPage from "./pages/MenuManagementPage";
 import QRGeneratorPage from "./pages/QRGeneratorPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
+
 export default function App() {
   const { token } = useAuth();
   return (
@@ -29,6 +31,13 @@ export default function App() {
         element={
           <PrivateRoute>
             <QRGeneratorPage />
+          </PrivateRoute>
+        }
+      />
+      <Route path="/admin/analytics"
+        element={
+          <PrivateRoute>
+            <AnalyticsPage />
           </PrivateRoute>
         }
       />

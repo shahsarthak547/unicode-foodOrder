@@ -6,6 +6,8 @@ import {
   deleteMenuItem,
   uploadCSV,
 } from "../api/adminApi";
+import { motion, AnimatePresence } from "framer-motion";
+import { Coffee, Edit2, Trash2, Upload, Plus, Save, FileSpreadsheet } from "lucide-react";
 
 export default function MenuManagementPage() {
   const [menu, setMenu] = useState([]);
@@ -21,6 +23,7 @@ export default function MenuManagementPage() {
 
   const [editingId, setEditingId] = useState(null);
   const [csvFile, setCsvFile] = useState(null);
+
   const fetchMenu = async () => {
     try {
       const res = await getMenu();
@@ -35,6 +38,7 @@ export default function MenuManagementPage() {
   useEffect(() => {
     fetchMenu();
   }, []);
+
   const handleSubmit = async () => {
     if (!form.name || !form.price || !form.category) {
       alert("Name, price & category are required");
@@ -46,7 +50,6 @@ export default function MenuManagementPage() {
     formData.append("description", form.description);
     formData.append("price", Number(form.price));
     formData.append("category", Number(form.category));
-
     formData.append("is_available", "true");
 
     if (form.image instanceof File) {
@@ -83,10 +86,11 @@ export default function MenuManagementPage() {
       category: item.category,
       image: null,
     });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this item?")) return;
+    if (!window.confirm("Delete this menu item permanently?")) return;
 
     try {
       await deleteMenuItem(id);
@@ -96,10 +100,9 @@ export default function MenuManagementPage() {
     }
   };
 
-
   const handleCSVUpload = async () => {
     if (!csvFile) {
-      alert("Select a CSV file");
+      alert("Select a CSV file first");
       return;
     }
 
@@ -113,138 +116,218 @@ export default function MenuManagementPage() {
   };
 
   if (loading) {
-    return <p className="p-6 text-center">Loading menu…</p>;
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF6F0]">
+        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="mb-4 text-[#D4A373]">
+            <Coffee size={40} />
+        </motion.div>
+        <p className="text-[#8C7A6B] font-medium tracking-wide">Loading menu items...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Menu Management</h1>
-
-      <div className="bg-white p-4 rounded-xl shadow mb-8">
-        <h2 className="font-semibold mb-3">
-          {editingId ? "Edit Item" : "Add New Item"}
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input
-            placeholder="Name"
-            className="border p-2 rounded"
-            value={form.name}
-            onChange={(e) =>
-              setForm({ ...form, name: e.target.value })
-            }
-          />
-
-          <input
-            type="number"
-            placeholder="Price"
-            className="border p-2 rounded"
-            value={form.price}
-            onChange={(e) =>
-              setForm({ ...form, price: e.target.value })
-            }
-          />
-
-          <input
-            type="number"
-            placeholder="Category ID"
-            className="border p-2 rounded"
-            value={form.category}
-            onChange={(e) =>
-              setForm({ ...form, category: e.target.value })
-            }
-          />
-
-          <input
-            placeholder="Description"
-            className="border p-2 rounded"
-            value={form.description}
-            onChange={(e) =>
-              setForm({ ...form, description: e.target.value })
-            }
-          />
-
-          <input
-            type="file"
-            accept="image/*"
-            className="border p-2 rounded"
-            onChange={(e) =>
-              setForm({ ...form, image: e.target.files[0] })
-            }
-          />
+    <div className="min-h-screen bg-[#FAF6F0] p-6 selection:bg-[#D4A373]/30">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-12 h-12 flex items-center justify-center">
+            <img src="/serveflow-logo.png" alt="ServeFlow Logo" className="w-full h-full object-contain" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold text-[#4A3B32]">Menu Editor</h1>
+            <p className="text-sm font-medium text-[#8C7A6B]">Manage your cafe offerings</p>
+          </div>
         </div>
 
-        <button
-          onClick={handleSubmit}
-          className="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg"
-        >
-          {editingId ? "Update Item" : "Add Item"}
-        </button>
-      </div>
-
-      <div className="bg-white p-4 rounded-xl shadow mb-8">
-        <h2 className="font-semibold mb-3">Bulk Upload (CSV)</h2>
-
-        <div className="flex gap-3 items-center">
-          <input
-            type="file"
-            accept=".csv"
-            onChange={(e) => setCsvFile(e.target.files[0])}
-          />
-          <button
-            onClick={handleCSVUpload}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-          >
-            Upload CSV
-          </button>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        {menu.length === 0 ? (
-          <p className="text-gray-500">No menu items</p>
-        ) : (
-          menu.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white p-4 rounded-xl shadow flex justify-between gap-4"
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          
+          <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-6">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-6 rounded-[24px] shadow-sm border border-[#E6D5C3]"
             >
-              <div className="flex gap-4">
-                {item.image && (
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="h-20 w-20 object-cover rounded"
+              <h2 className="text-lg font-bold text-[#4A3B32] mb-5 flex items-center gap-2">
+                {editingId ? <Edit2 size={18} className="text-[#D4A373]" /> : <Plus size={18} className="text-[#D4A373]" />}
+                {editingId ? "Edit Item" : "Create New Item"}
+              </h2>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-[#8C7A6B] uppercase tracking-wider mb-1.5 block">Item Name *</label>
+                  <input
+                    placeholder="e.g. Mocha Frappe"
+                    className="w-full bg-[#FAF6F0] p-3 rounded-xl border border-[#E6D5C3] text-[#4A3B32] font-medium focus:outline-none focus:ring-2 focus:ring-[#D4A373] transition"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
                   />
-                )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-[#8C7A6B] uppercase tracking-wider mb-1.5 block">Price (₹) *</label>
+                    <input
+                      type="number"
+                      placeholder="0.00"
+                      className="w-full bg-[#FAF6F0] p-3 rounded-xl border border-[#E6D5C3] text-[#4A3B32] font-medium focus:outline-none focus:ring-2 focus:ring-[#D4A373] transition"
+                      value={form.price}
+                      onChange={(e) => setForm({ ...form, price: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-[#8C7A6B] uppercase tracking-wider mb-1.5 block">Category ID *</label>
+                    <input
+                      type="number"
+                      placeholder="1"
+                      className="w-full bg-[#FAF6F0] p-3 rounded-xl border border-[#E6D5C3] text-[#4A3B32] font-medium focus:outline-none focus:ring-2 focus:ring-[#D4A373] transition"
+                      value={form.category}
+                      onChange={(e) => setForm({ ...form, category: e.target.value })}
+                    />
+                  </div>
+                </div>
 
                 <div>
-                  <h3 className="font-semibold">{item.name}</h3>
-                  <p className="text-sm text-gray-500">
-                    ₹{item.price} · Category {item.category}
-                  </p>
-                  <p className="text-sm">{item.description}</p>
+                  <label className="text-xs font-bold text-[#8C7A6B] uppercase tracking-wider mb-1.5 block">Description</label>
+                  <textarea
+                    placeholder="A delicious treat..."
+                    rows={3}
+                    className="w-full bg-[#FAF6F0] p-3 rounded-xl border border-[#E6D5C3] text-[#4A3B32] font-medium focus:outline-none focus:ring-2 focus:ring-[#D4A373] transition resize-none"
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-[#8C7A6B] uppercase tracking-wider mb-1.5 block">Image</label>
+                  <div className="w-full bg-[#FAF6F0] p-2 rounded-xl border border-[#E6D5C3] border-dashed file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#D4A373] file:text-white hover:file:bg-[#C28E5C] transition-colors text-sm text-[#8C7A6B]">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 flex gap-3">
+                  <button
+                    onClick={handleSubmit}
+                    className="flex-1 bg-[#D4A373] hover:bg-[#C28E5C] text-white px-4 py-3 rounded-xl font-bold active:scale-95 transition shadow-sm flex justify-center items-center gap-2"
+                  >
+                    <Save size={18} />
+                    {editingId ? "Update" : "Save Item"}
+                  </button>
+                  
+                  {editingId && (
+                    <button
+                      onClick={() => {
+                        setEditingId(null);
+                        setForm({ name: "", description: "", price: "", category: "", image: null });
+                      }}
+                      className="px-4 py-3 bg-[#FAF6F0] hover:bg-[#E6D5C3] text-[#8C7A6B] font-bold rounded-xl transition"
+                    >
+                      Cancel
+                    </button>
+                  )}
                 </div>
               </div>
+            </motion.div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleEdit(item)}
-                  className="px-3 py-1 border rounded"
-                >
-                  Edit
-                </button>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white p-6 rounded-[24px] shadow-sm border border-[#E6D5C3]"
+            >
+              <h2 className="text-lg font-bold text-[#4A3B32] mb-4 flex items-center gap-2">
+                <FileSpreadsheet size={18} className="text-[#D4A373]" />
+                Bulk CSV Upload
+              </h2>
 
+              <div className="flex flex-col gap-3">
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={(e) => setCsvFile(e.target.files[0])}
+                  className="w-full bg-[#FAF6F0] p-2 rounded-xl border border-[#E6D5C3] border-dashed file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#4A3B32] file:text-white transition-colors text-sm text-[#8C7A6B]"
+                />
                 <button
-                  onClick={() => handleDelete(item.id)}
-                  className="px-3 py-1 border text-red-600 rounded"
+                  onClick={handleCSVUpload}
+                  disabled={!csvFile}
+                  className="bg-[#4A3B32] hover:bg-[#3A2D25] text-white px-4 py-3 rounded-xl font-bold active:scale-95 transition shadow-sm flex justify-center items-center gap-2 disabled:opacity-50"
                 >
-                  Delete
+                  <Upload size={18} />
+                  Import CSV
                 </button>
               </div>
-            </div>
-          ))
-        )}
+            </motion.div>
+          </div>
+
+          <div className="lg:col-span-2 space-y-4">
+            {menu.length === 0 ? (
+              <div className="bg-white border border-[#E6D5C3] rounded-[24px] p-12 text-center flex flex-col items-center justify-center">
+                <Coffee size={48} className="text-[#D4A373]/30 mb-4" />
+                <p className="text-xl font-bold text-[#4A3B32]">Your menu is empty</p>
+                <p className="text-[#8C7A6B]">Add your first delicious item above.</p>
+              </div>
+            ) : (
+              <AnimatePresence>
+                {menu.map((item, i) => (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: i * 0.05, type: "spring", stiffness: 300, damping: 25 }}
+                    className={`bg-white p-5 rounded-[24px] shadow-sm border transition-shadow flex items-center gap-5 ${editingId === item.id ? 'border-[#D4A373] ring-2 ring-[#D4A373]/20' : 'border-[#E6D5C3]'}`}
+                  >
+                    <div className="w-24 h-24 shrink-0 rounded-[16px] bg-[#FAF6F0] overflow-hidden flex items-center justify-center border border-[#E6D5C3]/50">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <Coffee size={32} className="text-[#8C7A6B]/30" />
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="texl-lg font-black text-[#4A3B32] truncate">{item.name}</h3>
+                          <p className="text-sm font-bold text-[#D4A373] mb-1">
+                            ₹{item.price} <span className="text-[#8C7A6B] font-medium text-xs ml-2">CAT ID: {item.category}</span>
+                          </p>
+                        </div>
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#FAF6F0] hover:bg-[#D4A373] text-[#8C7A6B] hover:text-white transition-colors"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#FAF6F0] hover:bg-red-500 text-[#8C7A6B] hover:text-white transition-colors"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-sm text-[#8C7A6B] line-clamp-2 mt-2 leading-relaxed">
+                        {item.description || "No description provided."}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

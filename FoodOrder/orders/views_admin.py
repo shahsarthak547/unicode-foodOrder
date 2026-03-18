@@ -6,7 +6,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Order
 from .serializers import OrderSerializer
 from accounts.permissions import IsRestaurantStaff
-
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 class AdminOrderListView(generics.ListAPIView):
     serializer_class = OrderSerializer
@@ -39,4 +40,19 @@ class AdminOrderUpdateView(generics.UpdateAPIView):
         order.status = status_value
         order.save()
 
-        return Response(OrderSerializer(order).data)
+        order_data = OrderSerializer(order).data
+
+        # Broadcast order status update to the restaurant group
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'restaurant_{order.restaurant.id}_orders',
+            {
+                'type': 'order_message',
+                'message': {
+                    'action': 'order_updated',
+                    'order': order_data
+                }
+            }
+        )
+
+        return Response(order_data)

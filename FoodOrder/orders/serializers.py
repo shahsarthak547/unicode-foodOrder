@@ -11,6 +11,8 @@ class OrderCreateSerializer(serializers.Serializer):
     table_number = serializers.CharField()
     phone_number = serializers.CharField(required=False, allow_blank=True)
     note = serializers.CharField(required=False, allow_blank=True)
+    payment_status = serializers.CharField(required=False, default='PENDING')
+    payment_method = serializers.CharField(required=False, allow_blank=True)
     items = OrderItemCreateSerializer(many=True)
 
     def create(self, validated_data):
@@ -21,7 +23,9 @@ class OrderCreateSerializer(serializers.Serializer):
             restaurant=restaurant,
             table_number=validated_data.get("table_number"),
             phone_number=validated_data.get("phone_number"),
-            note=validated_data.get("note", "")
+            note=validated_data.get("note", ""),
+            payment_status=validated_data.get("payment_status", "PENDING"),
+            payment_method=validated_data.get("payment_method", "")
         )
 
         for item_data in items_data:
@@ -68,8 +72,21 @@ class OrderSerializer(serializers.ModelSerializer):
             'table_number',
             'phone_number',
             'status',
+            'payment_status',
+            'payment_method',
+            'rating',
+            'feedback_text',
             'note',
             'created_at',
             'items'
         ]
         read_only_fields = ['restaurant', 'created_at']
+
+class OrderReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['rating', 'feedback_text']
+        extra_kwargs = {
+            'rating': {'required': True, 'min_value': 1, 'max_value': 5},
+            'feedback_text': {'required': False, 'allow_blank': True}
+        }

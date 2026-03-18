@@ -37,8 +37,11 @@ export default function QRGeneratorPage() {
         
         {/* Header */}
         <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <img src="/serveflow-logo.png" alt="ServeFlow Logo" className="w-20 h-20 object-contain" />
+          </div>
           <h1 className="text-2xl font-bold text-gray-800">
-            QR Code Generator
+            ServeFlow QR Generator
           </h1>
           <p className="text-sm text-gray-500 mt-1">
             Generate QR for restaurant tables
