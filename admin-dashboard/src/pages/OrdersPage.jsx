@@ -43,6 +43,11 @@ export default function OrdersPage() {
       console.log("WebSocket connected for Admin Order Tracking");
     };
 
+    const playNotificationSound = () => {
+      const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+      audio.play().catch(err => console.log("Audio play blocked until user interaction", err));
+    };
+
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (!data.message) return;
@@ -52,6 +57,7 @@ export default function OrdersPage() {
       if (action === 'order_created') {
          // Prepend new order to list
          setOrders(prev => [order, ...prev]);
+         playNotificationSound();
          console.log("New order received via WS:", order.id);
       } 
       else if (action === 'order_updated') {
