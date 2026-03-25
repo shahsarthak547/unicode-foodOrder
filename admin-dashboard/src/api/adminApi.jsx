@@ -52,6 +52,9 @@ export const getAnalytics = (restaurantId) => {
   return api.get(`/api/restaurants/${restaurantId}/analytics/`);
 };
 
-export const verifyPayment = (orderId) => {
-  return api.patch(`/api/orders/${orderId}/verify/`);
-};
+export const verifyPayment = (orderId) => api.post(`/api/orders/${orderId}/verify/`);
+
+// Coupon Management
+export const getCoupons = () => api.get("/api/coupons/validate/ALL/"); // I'll need to update the backend view to handle 'ALL' for admins
+export const addCoupon = (data) => api.post("/api/coupons/validate/CREATE/", data); 
+export const deleteCoupon = (code) => api.delete(`/api/coupons/validate/${code}/`);

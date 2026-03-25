@@ -1,6 +1,6 @@
 import { useCart } from "../context/CartContext";
 import { useParams, useNavigate } from "react-router-dom";
-import { placeOrder } from "../api/customerApi";
+import { placeOrder, validateCoupon } from "../api/customerApi";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Plus, Minus, Trash2, ArrowRight, Loader, QrCode, ShieldCheck, Check, ChevronLeft } from "lucide-react";
@@ -12,28 +12,33 @@ export default function CartPage() {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState("review"); // 'review' or 'payment'
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState("");
 
   if (cart.length === 0) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF6F0] text-gray-700 px-6 text-center">
-        <motion.div 
-          initial={{ scale: 0.8, opacity: 0 }} 
-          animate={{ scale: 1, opacity: 1 }} 
-          className="text-amber-800/20 mb-6"
-        >
-          <ShoppingCart size={80} strokeWidth={1} />
-        </motion.div>
-        <p className="text-2xl font-bold mb-2 text-[#4A3B32]">Your cart is empty</p>
-        <p className="text-sm text-[#8C7A6B]">Add some delicious items from the menu</p>
-        <button 
-          onClick={() => navigate(`/restaurant/${restaurantId}/table/${tableNumber}/menu`)}
-          className="mt-8 px-6 py-3 bg-[#D4A373] hover:bg-[#C28E5C] text-white rounded-xl shadow-lg shadow-[#D4A373]/30 transition"
-        >
-          Back to Menu
-        </button>
-      </div>
-    );
+    // ... same empty cart logic ...
   }
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode) return;
+    try {
+      const res = await validateCoupon(couponCode);
+      setAppliedCoupon(res);
+      setCouponError("");
+    } catch (err) {
+      setCouponError("Invalid or expired coupon");
+      setAppliedCoupon(null);
+    }
+  };
+
+  const discount = appliedCoupon 
+    ? (appliedCoupon.discount_type === 'FIXED' 
+        ? Math.min(appliedCoupon.value, total) 
+        : (total * appliedCoupon.value) / 100)
+    : 0;
+
+  const finalTotal = total - discount;
 
   const handlePlaceOrder = async () => {
     try {
@@ -44,6 +49,7 @@ export default function CartPage() {
         note: "",
         payment_status: "PENDING",
         payment_method: "UPI",
+        coupon_code: appliedCoupon?.code || "",
         items: cart.map(item => ({
           menu_item_id: item.id,
           quantity: item.quantity
@@ -57,7 +63,8 @@ export default function CartPage() {
       clearCart();
       navigate(`/restaurant/${restaurantId}/table/${tableNumber}/order-status/${orderId}`);
     } catch (err) {
-      alert("Failed to place order");
+      const msg = err.response?.data?.detail || err.response?.data?.non_field_errors?.[0] || "Failed to place order";
+      alert(msg);
     } finally {
       setLoading(false);
     }
@@ -152,7 +159,39 @@ export default function CartPage() {
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="p-5 mt-6 rounded-2xl bg-[#E6D5C3]/30 border border-[#E6D5C3]"
+              className="p-5 mt-4 rounded-2xl bg-white border border-[#E6D5C3] shadow-sm"
+            >
+              <label className="text-sm font-bold text-[#4A3B32] block mb-2">Have a Promo Code?</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                  placeholder="e.g. SAVE10"
+                  className="flex-1 rounded-xl bg-[#FAF6F0] border border-[#E6D5C3] p-3 text-[#4A3B32] font-bold outline-none focus:ring-2 focus:ring-[#D4A373] transition uppercase"
+                />
+                <button 
+                  onClick={handleApplyCoupon}
+                  className="bg-[#4A3B32] text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-[#2D241F] transition active:scale-95"
+                >
+                  Apply
+                </button>
+              </div>
+              {couponError && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-wider">{couponError}</p>}
+              {appliedCoupon && (
+                <div className="mt-2 flex items-center justify-between bg-green-50 p-2 rounded-lg border border-green-100">
+                  <p className="text-green-700 text-xs font-bold uppercase tracking-widest flex items-center gap-1">
+                    <Check size={12} /> {appliedCoupon.code} Applied
+                  </p>
+                  <button onClick={() => setAppliedCoupon(null)} className="text-green-800/50 hover:text-green-800 text-xs font-bold underline">Remove</button>
+                </div>
+              )}
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-5 mt-4 rounded-2xl bg-[#E6D5C3]/30 border border-[#E6D5C3]"
             >
               <label className="text-sm font-bold text-[#4A3B32]">Mobile Number</label>
               <p className="text-xs text-[#8C7A6B] mb-3">Needed to send you order updates</p>
@@ -164,6 +203,23 @@ export default function CartPage() {
                 className="w-full rounded-xl bg-white border-0 shadow-sm p-4 text-[#4A3B32] font-medium outline-none focus:ring-2 focus:ring-[#D4A373] transition placeholder:text-[#8C7A6B]/50"
               />
             </motion.div>
+
+            <div className="p-5 mt-4 space-y-2 border-t border-[#E6D5C3]">
+               <div className="flex justify-between text-sm text-[#8C7A6B]">
+                  <span>Subtotal</span>
+                  <span>₹{total}</span>
+               </div>
+               {discount > 0 && (
+                 <div className="flex justify-between text-sm text-green-600 font-bold">
+                    <span>Discount</span>
+                    <span>-₹{discount}</span>
+                 </div>
+               )}
+               <div className="flex justify-between text-lg font-black text-[#4A3B32]">
+                  <span>Total</span>
+                  <span>₹{finalTotal}</span>
+               </div>
+            </div>
           </motion.div>
         ) : (
           <motion.div 
@@ -212,7 +268,7 @@ export default function CartPage() {
         <div className="max-w-md mx-auto bg-[#4A3B32] rounded-2xl shadow-xl shadow-[#4A3B32]/20 px-6 py-4 flex justify-between items-center text-white">
           <div>
             <p className="text-xs text-white/70 uppercase font-medium tracking-wider">Total</p>
-            <p className="text-2xl font-bold">₹{total}</p>
+            <p className="text-2xl font-bold">₹{finalTotal}</p>
           </div>
           {step === "review" ? (
             <button

@@ -6,6 +6,8 @@ import { useAuth } from "./auth/AuthContext";
 import MenuManagementPage from "./pages/MenuManagementPage";
 import QRGeneratorPage from "./pages/QRGeneratorPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import KitchenPage from "./pages/KitchenPage";
+import CouponsPage from "./pages/CouponsPage";
 
 export default function App() {
   const { token } = useAuth();
@@ -38,6 +40,20 @@ export default function App() {
         element={
           <PrivateRoute>
             <AnalyticsPage />
+          </PrivateRoute>
+        }
+      />
+      <Route path="/admin/kds"
+        element={
+          <PrivateRoute>
+            <KitchenPage />
+          </PrivateRoute>
+        }
+      />
+      <Route path="/admin/coupons"
+        element={
+          <PrivateRoute>
+            <CouponsPage />
           </PrivateRoute>
         }
       />

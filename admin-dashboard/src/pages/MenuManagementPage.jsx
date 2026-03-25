@@ -19,6 +19,8 @@ export default function MenuManagementPage() {
     price: "",
     category: "",
     image: null,
+    stock_quantity: 0,
+    track_inventory: false,
   });
 
   const [editingId, setEditingId] = useState(null);
@@ -51,6 +53,8 @@ export default function MenuManagementPage() {
     formData.append("price", Number(form.price));
     formData.append("category", Number(form.category));
     formData.append("is_available", "true");
+    formData.append("stock_quantity", Number(form.stock_quantity));
+    formData.append("track_inventory", form.track_inventory);
 
     if (form.image instanceof File) {
       formData.append("image", form.image);
@@ -69,6 +73,8 @@ export default function MenuManagementPage() {
         price: "",
         category: "",
         image: null,
+        stock_quantity: 0,
+        track_inventory: false,
       });
       setEditingId(null);
       fetchMenu();
@@ -85,6 +91,8 @@ export default function MenuManagementPage() {
       price: item.price,
       category: item.category,
       image: null,
+      stock_quantity: item.stock_quantity,
+      track_inventory: item.track_inventory,
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -198,6 +206,28 @@ export default function MenuManagementPage() {
                   />
                 </div>
 
+                <div className="flex items-center gap-4 bg-[#FAF6F0] p-4 rounded-xl border border-[#E6D5C3]">
+                  <div className="flex-1">
+                    <label className="text-xs font-bold text-[#8C7A6B] uppercase tracking-wider mb-1.5 block">Stock Level</label>
+                    <input
+                      type="number"
+                      className="w-full bg-white p-2 rounded-lg border border-[#E6D5C3] text-[#4A3B32] font-bold"
+                      value={form.stock_quantity}
+                      onChange={(e) => setForm({ ...form, stock_quantity: e.target.value })}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 pt-5">
+                    <input
+                      type="checkbox"
+                      id="track_inv"
+                      className="w-5 h-5 accent-[#D4A373]"
+                      checked={form.track_inventory}
+                      onChange={(e) => setForm({ ...form, track_inventory: e.target.checked })}
+                    />
+                    <label htmlFor="track_inv" className="text-xs font-bold text-[#4A3B32] uppercase tracking-widest cursor-pointer">Track Inventory</label>
+                  </div>
+                </div>
+
                 <div>
                   <label className="text-xs font-bold text-[#8C7A6B] uppercase tracking-wider mb-1.5 block">Image</label>
                   <div className="w-full bg-[#FAF6F0] p-2 rounded-xl border border-[#E6D5C3] border-dashed file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#D4A373] file:text-white hover:file:bg-[#C28E5C] transition-colors text-sm text-[#8C7A6B]">
@@ -298,10 +328,14 @@ export default function MenuManagementPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <h3 className="texl-lg font-black text-[#4A3B32] truncate">{item.name}</h3>
                           <p className="text-sm font-bold text-[#D4A373] mb-1">
                             ₹{item.price} <span className="text-[#8C7A6B] font-medium text-xs ml-2">CAT ID: {item.category}</span>
                           </p>
+                          {item.track_inventory && (
+                            <p className={`text-[10px] font-black uppercase px-2 py-0.5 rounded inline-block ${item.stock_quantity > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                              {item.stock_quantity > 0 ? `${item.stock_quantity} in stock` : 'Out of Stock'}
+                            </p>
+                          )}
                         </div>
                         <div className="flex gap-2 shrink-0">
                           <button

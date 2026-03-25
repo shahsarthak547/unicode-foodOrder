@@ -66,7 +66,7 @@ class OrderVerifyPaymentView(APIView):
     authentication_classes = []
     permission_classes = []
 
-    def patch(self, request, order_id):
+    def post(self, request, order_id):
         try:
             order = Order.objects.get(id=order_id)
             order.payment_status = 'PAID'
@@ -74,37 +74,77 @@ class OrderVerifyPaymentView(APIView):
             
             # Broadcast update
             order_data = OrderSerializer(order).data
-            channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)(
-                f'restaurant_{order.restaurant.id}_orders',
+            # Broadcast via WebSocket
+            layer = get_channel_layer()
+            async_to_sync(layer.group_send)(
+                f"restaurant_{order.restaurant.id}_orders",
                 {
-                    'type': 'order_message',
-                    'message': {
-                        'action': 'order_updated',
-                        'order': order_data
+                    "type": "order_update",
+                    "message": {
+                        "action": "order_updated",
+                        "order": OrderSerializer(order).data
                     }
                 }
             )
-            return Response(order_data)
+
+            return Response({"status": "payment verified"})
         except Order.DoesNotExist:
             return Response({'detail': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
 
+class ValidateCouponView(APIView):
+    def get(self, request, code):
+        from .models import Coupon
+        from .serializers import CouponSerializer
+        if code == 'ALL':
+            coupons = Coupon.objects.all().order_by('-valid_from')
+            return Response(CouponSerializer(coupons, many=True).data)
+        
+        try:
+            coupon = Coupon.objects.get(code=code, active=True)
+            return Response(CouponSerializer(coupon).data)
+        except Coupon.DoesNotExist:
+            return Response({"detail": "Invalid or expired coupon"}, status=404)
+
+    def post(self, request, code):
+        if code == 'CREATE':
+            from .serializers import CouponSerializer
+            serializer = CouponSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=201)
+            return Response(serializer.errors, status=400)
+        return Response(status=405)
+
+    def delete(self, request, code):
+        from .models import Coupon
+        try:
+            coupon = Coupon.objects.get(code=code)
+            coupon.delete()
+            return Response(status=204)
+        except Coupon.DoesNotExist:
+            return Response(status=404)
+
 class OrderAnalyticsView(APIView):
     def get(self, request, restaurant_id):
-        # We need to sum (price * quantity)
-        orders = Order.objects.filter(restaurant_id=restaurant_id, payment_status='PAID')
+        # Stats based on ALL orders for the restaurant
+        all_orders = Order.objects.filter(restaurant_id=restaurant_id)
+        paid_orders = all_orders.filter(payment_status='PAID')
         
-        # Calculate revenue by summing (OrderItem.price_at_order * OrderItem.quantity)
+        # Calculate gross revenue from PAID orders
         from .models import OrderItem
         revenue_data = OrderItem.objects.filter(order__restaurant_id=restaurant_id, order__payment_status='PAID') \
             .aggregate(total=Sum(F('price_at_order') * F('quantity')))
-            
-        total_revenue = revenue_data['total'] or 0
-        order_count = orders.count()
-        avg_rating = orders.aggregate(avg=Avg('rating'))['avg'] or 0
         
-        # Most popular items
-        popular_items = OrderItem.objects.filter(order__restaurant_id=restaurant_id, order__payment_status='PAID') \
+        # Calculate total discounts from PAID orders
+        total_discount = paid_orders.aggregate(total=Sum('discount_amount'))['total'] or 0
+            
+        total_revenue = (revenue_data['total'] or 0) - total_discount
+        order_count = all_orders.exclude(status='CANCELLED').count()
+        avg_rating = all_orders.exclude(rating__isnull=True).aggregate(avg=Avg('rating'))['avg'] or 0
+        
+        # Most popular items from ALL non-cancelled orders
+        popular_items = OrderItem.objects.filter(order__restaurant_id=restaurant_id) \
+            .exclude(order__status='CANCELLED') \
             .values('menu_item__name') \
             .annotate(total_sold=Sum('quantity')) \
             .order_by('-total_sold')[:5]

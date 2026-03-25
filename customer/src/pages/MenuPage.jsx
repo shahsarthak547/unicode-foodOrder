@@ -112,12 +112,16 @@ export default function MenuPage() {
                       <span className="text-lg font-bold text-[#4A3B32]">
                         ₹{item.price}
                       </span>
-                      <button
-                        onClick={() => addToCart(item)}
-                        className="bg-[#D4A373] hover:bg-[#C28E5C] text-white p-2 rounded-full shadow-md shadow-[#D4A373]/30 transition group"
-                      >
-                        <Plus size={18} className="group-active:rotate-90 transition-transform" />
-                      </button>
+                      {(!item.track_inventory || item.stock_quantity > 0) && item.is_available ? (
+                        <button
+                          onClick={() => addToCart(item)}
+                          className="bg-[#D4A373] hover:bg-[#C28E5C] text-white p-2 rounded-full shadow-md shadow-[#D4A373]/30 transition group"
+                        >
+                          <Plus size={18} className="group-active:rotate-90 transition-transform" />
+                        </button>
+                      ) : (
+                        <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">Out of Stock</span>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -174,12 +178,16 @@ export default function MenuPage() {
                             ₹{item.price}
                           </span>
 
-                          <button
-                            onClick={() => addToCart(item)}
-                            className="bg-[#FAF6F0] hover:bg-[#D4A373] text-[#D4A373] hover:text-white border border-[#D4A373] hover:border-transparent font-medium px-4 py-1.5 rounded-full text-sm transition-all focus:scale-95"
-                          >
-                            Add
-                          </button>
+                          {(!item.track_inventory || item.stock_quantity > 0) && item.is_available ? (
+                            <button
+                              onClick={() => addToCart(item)}
+                              className="bg-[#FAF6F0] hover:bg-[#D4A373] text-[#D4A373] hover:text-white border border-[#D4A373] hover:border-transparent font-medium px-4 py-1.5 rounded-full text-sm transition-all focus:scale-95"
+                            >
+                              Add
+                            </button>
+                          ) : (
+                            <span className="text-xs font-bold text-red-500 uppercase px-3 py-1 bg-red-50 rounded-full">Unavailable</span>
+                          )}
                         </div>
                       </div>
 

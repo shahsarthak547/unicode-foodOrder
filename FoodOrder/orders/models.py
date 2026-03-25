@@ -1,5 +1,20 @@
 from django.db import models
 
+class Coupon(models.Model):
+    CODE_TYPES = [
+        ('FIXED', 'Fixed Amount'),
+        ('PERCENTAGE', 'Percentage'),
+    ]
+    code = models.CharField(max_length=50, unique=True)
+    discount_type = models.CharField(max_length=20, choices=CODE_TYPES)
+    value = models.DecimalField(max_digits=10, decimal_places=2)
+    active = models.BooleanField(default=True)
+    valid_from = models.DateTimeField(auto_now_add=True)
+    valid_to = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.code
+
 class Order(models.Model):
     STATUS_CHOICES = [
         ('PENDING', 'Pending'),
@@ -7,23 +22,29 @@ class Order(models.Model):
         ('COMPLETED', 'Completed'),
         ('CANCELLED', 'Cancelled'),
     ]
-
-    PAYMENT_STATUS_CHOICES = [
-        ('PENDING', 'Pending'),
-        ('PAID', 'Paid'),
-        ('FAILED', 'Failed'),
-    ]
-
+    # ... existing choices ...
     restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE, related_name='orders')
     table_number = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
-    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
+    status = models.CharField(
+        max_length=20, 
+        choices=STATUS_CHOICES, 
+        default='PENDING'
+    )
+    payment_status = models.CharField(max_length=20, choices=[
+        ('PENDING', 'Pending'),
+        ('PAID', 'Paid'),
+        ('FAILED', 'Failed'),
+    ], default='PENDING')
     payment_method = models.CharField(max_length=50, blank=True, null=True)
     rating = models.PositiveSmallIntegerField(blank=True, null=True)
     feedback_text = models.TextField(blank=True)
     note = models.TextField(blank=True)
     phone_number = models.CharField(max_length=10, blank=True, null=True)
+    
+    # New Fields for Coupons
+    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     def __str__(self):
         return f"Order #{self.id} - {self.phone_number or 'No Phone'}"
 

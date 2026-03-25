@@ -13,6 +13,8 @@ class MenuItemSerializer(serializers.ModelSerializer):
             "image",       
             "is_available",
             "category",
+            "stock_quantity",
+            "track_inventory",
         ]
         read_only_fields = ['restaurant']
     def update(self, instance, validated_data):

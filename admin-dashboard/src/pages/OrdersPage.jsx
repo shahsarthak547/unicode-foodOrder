@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getOrders, updateOrderStatus, verifyPayment } from "../api/adminApi";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coffee, CheckCircle, Clock, RefreshCcw, BarChart3, ShieldCheck } from "lucide-react";
+import { Coffee, CheckCircle, Clock, RefreshCcw, BarChart3, ShieldCheck, Ticket } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function OrdersPage() {
@@ -132,6 +132,14 @@ export default function OrdersPage() {
               ))}
             </div>
             <div className="w-px h-6 bg-[#E6D5C3] mx-1" />
+            <Link to="/admin/kds" className="px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg transition font-bold text-sm flex items-center gap-2">
+              <RefreshCcw size={18} />
+              Kitchen (KDS)
+            </Link>
+            <Link to="/admin/coupons" className="px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition font-bold text-sm flex items-center gap-2">
+              <Ticket size={18} />
+              Coupons
+            </Link>
             <Link to="/admin/analytics" className="px-4 py-2 text-[#D4A373] hover:bg-white rounded-lg transition font-bold text-sm flex items-center gap-2">
               <BarChart3 size={18} />
               Insights
@@ -238,12 +246,19 @@ export default function OrdersPage() {
                       ))}
                     </div>
 
-                    <div className="flex justify-between items-center pt-4 border-t border-[#E6D5C3] mt-auto">
-                      <p className="text-lg font-black text-[#4A3B32]">
-                        ₹{total}
-                      </p>
-
-                      <div className="flex items-center gap-2">
+                    <div className="flex flex-col pt-4 border-t border-[#E6D5C3] mt-auto">
+                      {order.discount_amount > 0 && (
+                        <div className="flex justify-between text-xs font-bold text-green-600 mb-1">
+                           <span>Discount Applied</span>
+                           <span>-₹{order.discount_amount}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center">
+                        <p className="text-lg font-black text-[#4A3B32]">
+                          ₹{total - (order.discount_amount || 0)}
+                        </p>
+                        
+                        <div className="flex items-center gap-2">
                         {order.payment_status === "PENDING" && (
                           <button
                             onClick={() => handleVerifyPayment(order.id)}
@@ -262,6 +277,7 @@ export default function OrdersPage() {
                         )}
                       </div>
                     </div>
+                  </div>
                   </motion.div>
                 );
               })}

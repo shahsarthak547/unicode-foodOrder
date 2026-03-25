@@ -21,3 +21,7 @@ export const placeOrder = async (restaurantId, payload) => {
   );
   return res.data;
 };
+export const validateCoupon = async (code) => {
+  const res = await axios.get(`${API_BASE}/api/coupons/validate/${code}/`);
+  return res.data;
+};
