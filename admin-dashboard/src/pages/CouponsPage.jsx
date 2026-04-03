@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
+import { Ticket, Plus, Trash2, Save, Coffee, Percent, IndianRupee, ArrowLeft } from "lucide-react";
+import { useAuth } from "../auth/AuthContext";
+import { Link } from "react-router-dom";
 import { getCoupons, addCoupon, deleteCoupon } from "../api/adminApi";
 import { motion, AnimatePresence } from "framer-motion";
-import { Ticket, Plus, Trash2, Save, Coffee, Percent, IndianRupee } from "lucide-react";
 
 export default function CouponsPage() {
+  const { restaurantId } = useAuth();
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
@@ -14,7 +17,8 @@ export default function CouponsPage() {
 
   const fetchCoupons = async () => {
     try {
-      const res = await getCoupons();
+      if (!restaurantId) return;
+      const res = await getCoupons(restaurantId);
       setCoupons(res.data);
     } catch {
       alert("Failed to load coupons");
@@ -25,7 +29,7 @@ export default function CouponsPage() {
 
   useEffect(() => {
     fetchCoupons();
-  }, []);
+  }, [restaurantId]);
 
   const handleSubmit = async () => {
     if (!form.code || !form.value) {
@@ -62,6 +66,14 @@ export default function CouponsPage() {
   return (
     <div className="min-h-screen bg-[#FAF6F0] p-8 font-sans selection:bg-[#D4A373]/30">
       <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <Link to="/admin/orders" className="flex items-center gap-2 text-[#8C7A6B] hover:text-[#4A3B32] transition font-bold group">
+            <div className="p-2 bg-white rounded-xl shadow-sm border border-[#E6D5C3] group-hover:scale-110 transition">
+              <ArrowLeft size={20} />
+            </div>
+            Back to Dashboard
+          </Link>
+        </div>
         <div className="flex items-center gap-4 mb-10">
           <div className="bg-[#4A3B32] p-3 rounded-2xl shadow-lg shadow-[#4A3B32]/20">
             <Ticket className="text-white" size={32} />
@@ -74,32 +86,32 @@ export default function CouponsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
-            <motion.div 
-               initial={{ opacity: 0, y: 20 }}
-               animate={{ opacity: 1, y: 0 }}
-               className="bg-white p-6 rounded-[32px] shadow-sm border border-[#E6D5C3] sticky top-8"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-6 rounded-[32px] shadow-sm border border-[#E6D5C3] sticky top-8"
             >
               <h2 className="text-lg font-black text-[#4A3B32] mb-6 flex items-center gap-2 uppercase tracking-wider">
                 <Plus size={18} className="text-[#D4A373]" /> Create Promo
               </h2>
-              
+
               <div className="space-y-5">
                 <div>
                   <label className="text-xs font-black text-[#8C7A6B] uppercase tracking-widest mb-2 block">Coupon Code</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="E.G. WELCOME20"
                     value={form.code}
-                    onChange={e => setForm({...form, code: e.target.value.toUpperCase()})}
+                    onChange={e => setForm({ ...form, code: e.target.value.toUpperCase() })}
                     className="w-full bg-[#FAF6F0] p-4 rounded-2xl border border-[#E6D5C3] text-[#4A3B32] font-black focus:ring-2 focus:ring-[#D4A373] outline-none transition placeholder:opacity-30"
                   />
                 </div>
 
                 <div>
                   <label className="text-xs font-black text-[#8C7A6B] uppercase tracking-widest mb-2 block">Discount Type</label>
-                  <select 
+                  <select
                     value={form.discount_type}
-                    onChange={e => setForm({...form, discount_type: e.target.value})}
+                    onChange={e => setForm({ ...form, discount_type: e.target.value })}
                     className="w-full bg-[#FAF6F0] p-4 rounded-2xl border border-[#E6D5C3] text-[#4A3B32] font-black outline-none focus:ring-2 focus:ring-[#D4A373] appearance-none"
                   >
                     <option value="PERCENTAGE">Percentage (%)</option>
@@ -110,11 +122,11 @@ export default function CouponsPage() {
                 <div>
                   <label className="text-xs font-black text-[#8C7A6B] uppercase tracking-widest mb-2 block">Value</label>
                   <div className="relative">
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       placeholder="0.00"
                       value={form.value}
-                      onChange={e => setForm({...form, value: e.target.value})}
+                      onChange={e => setForm({ ...form, value: e.target.value })}
                       className="w-full bg-[#FAF6F0] p-4 rounded-2xl border border-[#E6D5C3] text-[#4A3B32] font-black focus:ring-2 focus:ring-[#D4A373] outline-none transition"
                     />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#D4A373]">
@@ -123,7 +135,7 @@ export default function CouponsPage() {
                   </div>
                 </div>
 
-                <button 
+                <button
                   onClick={handleSubmit}
                   className="w-full bg-[#D4A373] hover:bg-[#C28E5C] text-white py-4 rounded-2xl font-black uppercase tracking-widest mt-4 shadow-xl shadow-[#D4A373]/20 active:scale-95 transition flex items-center justify-center gap-2"
                 >
@@ -135,10 +147,10 @@ export default function CouponsPage() {
 
           <div className="lg:col-span-2 space-y-4">
             {coupons.length === 0 ? (
-               <div className="bg-white border-2 border-dashed border-[#E6D5C3] rounded-[40px] p-20 text-center">
-                  <Ticket size={64} className="text-[#E6D5C3] mx-auto mb-4" />
-                  <p className="text-[#8C7A6B] font-black uppercase tracking-[0.2em]">No active coupons</p>
-               </div>
+              <div className="bg-white border-2 border-dashed border-[#E6D5C3] rounded-[40px] p-20 text-center">
+                <Ticket size={64} className="text-[#E6D5C3] mx-auto mb-4" />
+                <p className="text-[#8C7A6B] font-black uppercase tracking-[0.2em]">No active coupons</p>
+              </div>
             ) : (
               <AnimatePresence>
                 {coupons.map((coupon, i) => (
@@ -151,22 +163,22 @@ export default function CouponsPage() {
                     className="bg-white p-6 rounded-[32px] border border-[#E6D5C3] flex items-center justify-between group hover:shadow-xl hover:shadow-[#4A3B32]/5 transition-all"
                   >
                     <div className="flex items-center gap-6">
-                       <div className="w-16 h-16 bg-[#FAF6F0] rounded-2xl flex items-center justify-center text-[#D4A373] border border-[#E6D5C3] group-hover:scale-110 transition-transform">
-                          {coupon.discount_type === 'PERCENTAGE' ? <Percent size={24} /> : <IndianRupee size={24} />}
-                       </div>
-                       <div>
-                          <h3 className="text-2xl font-black text-[#4A3B32] tracking-tighter uppercase">{coupon.code}</h3>
-                          <p className="text-[#8C7A6B] text-xs font-bold uppercase tracking-widest mt-1">
-                             {coupon.discount_type === 'PERCENTAGE' ? `${coupon.value}% OFF` : `₹${coupon.value} FLAT OFF`}
-                          </p>
-                       </div>
+                      <div className="w-16 h-16 bg-[#FAF6F0] rounded-2xl flex items-center justify-center text-[#D4A373] border border-[#E6D5C3] group-hover:scale-110 transition-transform">
+                        {coupon.discount_type === 'PERCENTAGE' ? <Percent size={24} /> : <IndianRupee size={24} />}
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-black text-[#4A3B32] tracking-tighter uppercase">{coupon.code}</h3>
+                        <p className="text-[#8C7A6B] text-xs font-bold uppercase tracking-widest mt-1">
+                          {coupon.discount_type === 'PERCENTAGE' ? `${coupon.value}% OFF` : `₹${coupon.value} FLAT OFF`}
+                        </p>
+                      </div>
                     </div>
 
-                    <button 
+                    <button
                       onClick={() => handleDelete(coupon.code)}
                       className="w-12 h-12 flex items-center justify-center rounded-2xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all active:scale-90"
                     >
-                       <Trash2 size={20} />
+                      <Trash2 size={20} />
                     </button>
                   </motion.div>
                 ))}

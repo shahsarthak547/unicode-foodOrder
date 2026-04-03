@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
-import { getAnalytics } from "../api/adminApi";
-import { motion } from "framer-motion";
 import { BarChart3, TrendingUp, Users, Star, ArrowLeft, Coffee, Award } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
+import { getAnalytics } from "../api/adminApi";
+import { motion } from "framer-motion";
 
 export default function AnalyticsPage() {
+  const { restaurantId } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        // Using restaurant ID 4 (Byte Brew)
-        const res = await getAnalytics(4);
+        if (!restaurantId) return;
+        const res = await getAnalytics(restaurantId);
         setData(res.data);
       } catch (err) {
         console.error("Failed to fetch analytics", err);
@@ -21,7 +23,7 @@ export default function AnalyticsPage() {
       }
     };
     fetchAnalytics();
-  }, []);
+  }, [restaurantId]);
 
   if (loading) {
     return (

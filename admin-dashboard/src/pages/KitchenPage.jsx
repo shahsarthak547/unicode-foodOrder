@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { getOrders, updateOrderStatus } from "../api/adminApi";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, CheckCircle, Coffee, LayoutGrid, Timer } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
+import { ChefHat, Timer, Clock, CheckCircle, LayoutGrid, Coffee } from "lucide-react";
 
 export default function KitchenPage() {
+  const { restaurantId } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(new Date());
@@ -12,7 +14,7 @@ export default function KitchenPage() {
   const fetchActiveOrders = async () => {
     try {
       const res = await getOrders();
-      // Only show PENDING or IN_PROGRESS orders in KDS
+      // Show PENDING (to start) or IN_PROGRESS (to finish)
       const active = res.data.filter(o => o.status === "PENDING" || o.status === "IN_PROGRESS");
       setOrders(active);
     } catch (err) {
@@ -28,7 +30,8 @@ export default function KitchenPage() {
     // Timer sync for "time ago"
     const timer = setInterval(() => setNow(new Date()), 30000);
 
-    const wsUrl = `ws://127.0.0.1:8000/ws/restaurant/4/orders/`;
+    if (!restaurantId) return;
+    const wsUrl = `ws://10.195.227.158:8000/ws/restaurant/${restaurantId}/orders/`;
     const socket = new WebSocket(wsUrl);
 
     socket.onmessage = (event) => {
@@ -43,7 +46,12 @@ export default function KitchenPage() {
         if (order.status === "COMPLETED" || order.status === "CANCELLED") {
           setOrders(prev => prev.filter(o => o.id !== order.id));
         } else {
-          setOrders(prev => prev.map(o => o.id === order.id ? order : o));
+          setOrders(prev => {
+            const exists = prev.find(o => o.id === order.id);
+            if (exists) return prev.map(o => o.id === order.id ? order : o);
+            if (order.status === "PENDING" || order.status === "IN_PROGRESS") return [...prev, order];
+            return prev;
+          });
         }
       }
     };
@@ -52,7 +60,7 @@ export default function KitchenPage() {
       socket.close();
       clearInterval(timer);
     };
-  }, []);
+  }, [restaurantId]);
 
   const handleStatusUpdate = async (id, status) => {
     try {
@@ -129,7 +137,9 @@ export default function KitchenPage() {
                         <Timer size={20} />
                         {getTimeDiff(order.created_at)}
                       </div>
-                      <p className="text-white/60 text-[10px] font-black uppercase tracking-widest">{order.status}</p>
+                      <p className={`text-[10px] font-black uppercase tracking-widest ${order.status === 'PENDING' ? 'text-white/40' : 'text-blue-200 animate-pulse'}`}>
+                        {order.status === 'PENDING' ? 'New Order' : 'Preparing'}
+                      </p>
                     </div>
                   </div>
 
@@ -153,29 +163,21 @@ export default function KitchenPage() {
                     </div>
                   </div>
 
-                  <div className="p-4 grid grid-cols-2 gap-3 bg-[#111]">
+                  <div className="p-4 flex flex-col gap-3 bg-[#111]">
                     {order.status === "PENDING" ? (
                       <button 
                          onClick={() => handleStatusUpdate(order.id, "IN_PROGRESS")}
-                         className="col-span-2 bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl font-black text-xl uppercase transition active:scale-95 flex items-center justify-center gap-3"
+                         className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 rounded-2xl font-black text-xl uppercase transition active:scale-95 flex items-center justify-center gap-3 shadow-lg shadow-blue-600/20"
                       >
-                         <Clock size={24} /> Start Cooking
+                         <Clock size={24} /> Start Now
                       </button>
                     ) : (
-                      <>
-                        <button 
-                           onClick={() => handleStatusUpdate(order.id, "COMPLETED")}
-                           className="bg-green-600 hover:bg-green-700 text-white py-5 rounded-2xl font-black text-xl uppercase transition active:scale-95 flex items-center justify-center gap-3"
-                        >
-                           <CheckCircle size={24} /> Done
-                        </button>
-                        <button 
-                           onClick={() => handleStatusUpdate(order.id, "PENDING")}
-                           className="bg-white/5 hover:bg-white/10 text-white py-5 rounded-2xl font-black text-sm uppercase transition active:scale-95 border border-white/10"
-                        >
-                           Revert
-                        </button>
-                      </>
+                      <button 
+                         onClick={() => handleStatusUpdate(order.id, "COMPLETED")}
+                         className="w-full bg-green-600 hover:bg-green-700 text-white py-6 rounded-2xl font-black text-xl uppercase transition active:scale-95 flex items-center justify-center gap-3 shadow-lg shadow-green-600/20"
+                      >
+                         <CheckCircle size={24} /> Mark Ready
+                      </button>
                     )}
                   </div>
                 </motion.div>
@@ -188,25 +190,3 @@ export default function KitchenPage() {
   );
 }
 
-function ChefHat({ size, className }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2.5" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="M6 18h12" />
-      <path d="M6 22h12" />
-      <path d="M17 14c2.8 0 5-2.2 5-5s-2.2-5-5-5a5 5 0 0 0-10 0 5 5 0 0 0-5 5c0 2.8 2.2 5 5 5" />
-      <path d="M9 18v-4" />
-      <path d="M15 18v-4" />
-    </svg>
-  );
-}

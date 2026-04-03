@@ -5,12 +5,16 @@ class Coupon(models.Model):
         ('FIXED', 'Fixed Amount'),
         ('PERCENTAGE', 'Percentage'),
     ]
-    code = models.CharField(max_length=50, unique=True)
+    restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE, related_name='coupons', null=True, blank=True)
+    code = models.CharField(max_length=50)
     discount_type = models.CharField(max_length=20, choices=CODE_TYPES)
     value = models.DecimalField(max_digits=10, decimal_places=2)
     active = models.BooleanField(default=True)
     valid_from = models.DateTimeField(auto_now_add=True)
     valid_to = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('restaurant', 'code')
 
     def __str__(self):
         return self.code

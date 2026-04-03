@@ -79,7 +79,7 @@ class OrderVerifyPaymentView(APIView):
             async_to_sync(layer.group_send)(
                 f"restaurant_{order.restaurant.id}_orders",
                 {
-                    "type": "order_update",
+                    "type": "order_message",
                     "message": {
                         "action": "order_updated",
                         "order": OrderSerializer(order).data

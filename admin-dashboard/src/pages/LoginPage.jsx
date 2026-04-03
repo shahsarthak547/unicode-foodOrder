@@ -16,11 +16,11 @@ export default function LoginPage() {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://127.0.0.1:8000/admin/auth/login/",
+        "http://10.195.227.158:8000/admin/auth/login/",
         { username, password }
       );
 
-      login(res.data.access);
+      login(res.data.access, res.data.restaurant_id);
       navigate("/admin/orders");
     } catch (err) {
       console.error(err);

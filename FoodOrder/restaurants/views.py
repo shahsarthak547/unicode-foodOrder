@@ -63,6 +63,26 @@ class RestaurantMenuView(APIView):
                 "items": uncategorized_serializer.data
             })
 
+        # Custom priority-based sorting for categories
+        def get_priority(name):
+            name = name.lower()
+            # 0: Hot/Cold Brews & Basic Drinks first
+            if any(k in name for k in ["brew", "coffee", "tea", "drink", "beverage", "hot", "cold"]):
+                return 0
+            # 4: Add-ons / Extras last
+            if any(k in name for k in ["add-on", "addon", "extra", "add ons"]):
+                return 4
+            # 2: Desserts and Sweets at the end (before add-ons)
+            if any(k in name for k in ["dessert", "sweet", "cake", "pastry", "bakery", "shake"]):
+                return 2
+            # 3: "Others" category
+            if name == "others":
+                return 3
+            # 1: All other food items (Burgers, Pasta, etc.)
+            return 1
+
+        response_data["menu"].sort(key=lambda x: get_priority(x["name"]))
+
         return Response(response_data)
 class RestaurantDetailView(APIView):
     """

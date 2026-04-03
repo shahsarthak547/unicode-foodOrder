@@ -40,6 +40,7 @@ class AdminMenuUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
 class AdminMenuCSVUploadView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsRestaurantStaff]
+    parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
         file = request.FILES.get("file")
@@ -50,24 +51,33 @@ class AdminMenuCSVUploadView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        decoded_file = file.read().decode("utf-8")
-        reader = csv.DictReader(io.StringIO(decoded_file))
+        try:
+            decoded_file = file.read().decode("utf-8")
+            reader = csv.DictReader(io.StringIO(decoded_file))
 
-        restaurant = request.user.restaurant
-        created = 0
+            restaurant = request.user.restaurant
+            created = 0
 
-        for row in reader:
-            MenuItem.objects.create(
-                restaurant=restaurant,
-                name=row["name"],
-                description=row.get("description", ""),
-                price=row["price"],
-                # category_id=row["category"],
-                is_available=True
+            for row in reader:
+                # Handle boolean conversion for is_available
+                is_avail = str(row.get("is_available", "true")).lower() == "true"
+                
+                MenuItem.objects.create(
+                    restaurant=restaurant,
+                    name=row["name"],
+                    description=row.get("description", ""),
+                    price=row["price"],
+                    category_id=row.get("category"),  # Map CSV "category" to model "category_id"
+                    is_available=is_avail
+                )
+                created += 1
+
+            return Response(
+                {"detail": f"{created} items uploaded successfully"},
+                status=status.HTTP_201_CREATED
             )
-            created += 1
-
-        return Response(
-            {"detail": f"{created} items uploaded successfully"},
-            status=status.HTTP_201_CREATED
-        )
+        except Exception as e:
+            return Response(
+                {"detail": f"Error parsing CSV: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )

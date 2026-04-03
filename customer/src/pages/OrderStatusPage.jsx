@@ -15,32 +15,65 @@ export default function OrderStatusPage() {
   const redirectedRef = useRef(false);
 
   useEffect(() => {
-    // 1. Initial Fetch
+    let socket = null;
+    let retryCount = 0;
+    const maxRetries = 5;
+
     const fetchStatus = async () => {
       try {
-        const res = await axios.get(`http://127.0.0.1:8000/api/orders/${orderId}/`);
+        const res = await axios.get(`http://10.195.227.158:8000/api/orders/${orderId}/`);
+        console.log("Initial status fetch:", res.data.status);
         processStatusUpdate(res.data.status);
       } catch (err) {
-        console.error("Failed to fetch initial order status", err);
+        console.error("Failed to fetch initial order status:", err);
       }
     };
-    fetchStatus();
 
-    // 2. Setup WebSocket
-    const wsUrl = `ws://127.0.0.1:8000/ws/restaurant/${restaurantId}/orders/`;
-    const socket = new WebSocket(wsUrl);
+    const connectWS = () => {
+      if (retryCount >= maxRetries) return;
 
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.message && data.message.action === 'order_updated') {
-        const updatedOrder = data.message.order;
-        if (updatedOrder.id.toString() === orderId.toString()) {
-          processStatusUpdate(updatedOrder.status);
+      const wsUrl = `ws://10.195.227.158:8000/ws/restaurant/${restaurantId}/orders/`;
+      console.log(`Connecting to WebSocket: ${wsUrl}`);
+      socket = new WebSocket(wsUrl);
+
+      socket.onopen = () => {
+        console.log("WebSocket Connected ✅");
+        retryCount = 0;
+      };
+
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("WS Message received:", data);
+        
+        if (data.message && data.message.action === 'order_updated') {
+          const updatedOrder = data.message.order;
+          if (updatedOrder.id.toString() === orderId.toString()) {
+            console.log(`Order ${orderId} status updated to: ${updatedOrder.status}`);
+            processStatusUpdate(updatedOrder.status);
+          }
         }
-      }
+      };
+
+      socket.onerror = (error) => {
+        console.error("WebSocket Error ❌", error);
+      };
+
+      socket.onclose = () => {
+        console.log("WebSocket Disconnected ⚠️");
+        if (retryCount < maxRetries) {
+          retryCount++;
+          console.log(`Retrying connection (${retryCount}/${maxRetries})...`);
+          setTimeout(connectWS, 3000);
+        }
+      };
     };
 
-    return () => socket.close();
+    fetchStatus();
+    connectWS();
+
+    return () => {
+      if (socket) socket.close();
+    };
   }, [orderId, restaurantId, tableNumber, navigate]);
 
   const processStatusUpdate = (newStatus) => {
@@ -62,7 +95,7 @@ export default function OrderStatusPage() {
   const submitRating = async (val) => {
     try {
       setRating(val);
-      await axios.patch(`http://127.0.0.1:8000/api/orders/${orderId}/review/`, {
+      await axios.patch(`http://10.195.227.158:8000/api/orders/${orderId}/review/`, {
         rating: val
       });
       setHasRated(true);
@@ -76,8 +109,8 @@ export default function OrderStatusPage() {
   }
 
   const steps = [
-    { label: "Received", done: true },
-    { label: "Brewing", done: status === "IN_PROGRESS" || status === "COMPLETED" },
+    { label: "Ordered", done: true },
+    { label: "Preparing", done: status === "IN_PROGRESS" || status === "COMPLETED" },
     { label: "Ready", done: status === "COMPLETED" }
   ];
 
@@ -185,8 +218,12 @@ export default function OrderStatusPage() {
                 </div>
               </div>
 
-              <h1 className="text-2xl font-bold text-[#4A3B32] mb-3">Crafting Your Order</h1>
-              <p className="text-[#8C7A6B] text-sm mb-8 px-4">Your delicious items are being prepared with care.</p>
+              <h1 className="text-2xl font-bold text-[#4A3B32] mb-3">
+                {status === "PENDING" ? "Order Received" : "Crafting Your Order"}
+              </h1>
+              <p className="text-[#8C7A6B] text-sm mb-8 px-4">
+                {status === "PENDING" ? "Your order is in the kitchen queue." : "Your delicious items are being prepared with care."}
+              </p>
 
               <div className="w-full bg-[#FAF6F0] rounded-full h-2 overflow-hidden mb-3">
                 <motion.div 

@@ -5,7 +5,7 @@ export default function QRGeneratorPage() {
   const [restaurantId, setRestaurantId] = useState("");
   const [tableNumber, setTableNumber] = useState("");
 
-  const baseUrl = "http://localhost:5173";
+  const baseUrl = "http://10.195.227.158:5173";
 
   const menuUrl =
     restaurantId && tableNumber
@@ -27,8 +27,22 @@ export default function QRGeneratorPage() {
   };
 
   const copyLink = async () => {
-    await navigator.clipboard.writeText(menuUrl);
-    alert("Menu link copied!");
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(menuUrl);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = menuUrl;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      alert("Menu link copied!");
+    } catch (err) {
+      console.error("Failed to copy:", err);
+      alert("Failed to copy link. Please copy it manually.");
+    }
   };
 
   return (

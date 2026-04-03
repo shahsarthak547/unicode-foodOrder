@@ -3,8 +3,10 @@ import { getOrders, updateOrderStatus, verifyPayment } from "../api/adminApi";
 import { motion, AnimatePresence } from "framer-motion";
 import { Coffee, CheckCircle, Clock, RefreshCcw, BarChart3, ShieldCheck, Ticket } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
 export default function OrdersPage() {
+  const { restaurantId } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
@@ -35,8 +37,8 @@ export default function OrdersPage() {
     fetchOrders();
 
     // 2. Setup WebSocket for real-time order tracking
-    // For demo purposes, we connect to restaurant ID 1. Ideally, this comes from the admin profile.
-    const wsUrl = `ws://127.0.0.1:8000/ws/restaurant/4/orders/`;
+    if (!restaurantId) return;
+    const wsUrl = `ws://10.195.227.158:8000/ws/restaurant/${restaurantId}/orders/`;
     const socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
@@ -73,7 +75,7 @@ export default function OrdersPage() {
 
     // Cleanup on unmount
     return () => socket.close();
-  }, []);
+  }, [restaurantId]);
 
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -216,17 +218,19 @@ export default function OrdersPage() {
                         )}
                       </div>
 
-                      <span
-                        className={`
-                          px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5
-                          ${isPending
-                            ? "bg-[#E07A5F]/10 text-[#E07A5F]"
-                            : "bg-green-100 text-green-700"}
-                        `}
-                      >
-                        {isPending ? <Clock size={12} /> : <CheckCircle size={12} />}
-                        {order.status}
-                      </span>
+                        <span
+                          className={`
+                            px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5
+                            ${order.status === "PENDING" ? "bg-amber-100 text-amber-700" : 
+                              order.status === "IN_PROGRESS" ? "bg-orange-100 text-orange-700" :
+                              "bg-green-100 text-green-700"}
+                          `}
+                        >
+                          {order.status === "PENDING" ? <Clock size={12} /> : 
+                           order.status === "COMPLETED" ? <CheckCircle size={12} /> : 
+                           <RefreshCcw size={12} className="animate-spin-slow" />}
+                          {order.status}
+                        </span>
                     </div>
 
                     <div className="space-y-3 mb-6 flex-1">
@@ -267,7 +271,8 @@ export default function OrdersPage() {
                             <ShieldCheck size={14} /> Verify Payment
                           </button>
                         )}
-                        {isPending && (
+
+                        {(order.status === "PENDING" || order.status === "IN_PROGRESS") && (
                           <button
                             onClick={() => handleStatusChange(order.id, "COMPLETED")}
                             className="bg-[#4A3B32] hover:bg-[#2D241F] text-white px-5 py-2 rounded-xl font-bold tracking-wide active:scale-95 transition shadow-sm"

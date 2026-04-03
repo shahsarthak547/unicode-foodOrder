@@ -5,7 +5,8 @@ from restaurants.models import MenuItem
 class CouponSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coupon
-        fields = ['code', 'discount_type', 'value']
+        fields = ['code', 'discount_type', 'value', 'active', 'restaurant']
+        read_only_fields = ['restaurant']
 
 
 class OrderItemCreateSerializer(serializers.Serializer):
@@ -34,7 +35,12 @@ class OrderCreateSerializer(serializers.Serializer):
         
         if coupon_code:
             try:
-                coupon = Coupon.objects.get(code=coupon_code, active=True)
+                # Filter by current restaurant
+                from django.db.models import Q
+                coupon = Coupon.objects.get(
+                    Q(code=coupon_code, active=True) & 
+                    (Q(restaurant=restaurant) | Q(restaurant__isnull=True))
+                )
             except Coupon.DoesNotExist:
                 pass
 

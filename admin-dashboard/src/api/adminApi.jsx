@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+  baseURL: "http://10.195.227.158:8000",
 });
 
 
@@ -55,6 +55,6 @@ export const getAnalytics = (restaurantId) => {
 export const verifyPayment = (orderId) => api.post(`/api/orders/${orderId}/verify/`);
 
 // Coupon Management
-export const getCoupons = () => api.get("/api/coupons/validate/ALL/"); // I'll need to update the backend view to handle 'ALL' for admins
+export const getCoupons = (restaurantId) => api.get(`/api/coupons/validate/ALL/?restaurant_id=${restaurantId}`);
 export const addCoupon = (data) => api.post("/api/coupons/validate/CREATE/", data); 
 export const deleteCoupon = (code) => api.delete(`/api/coupons/validate/${code}/`);
