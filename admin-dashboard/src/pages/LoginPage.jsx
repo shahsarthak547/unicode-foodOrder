@@ -16,7 +16,7 @@ export default function LoginPage() {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://10.195.227.158:8000/admin/auth/login/",
+        "http://10.56.145.158:8000/admin/auth/login/",
         { username, password }
       );
 

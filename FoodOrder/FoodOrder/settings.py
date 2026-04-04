@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '10.195.227.158',
+    '10.56.145.158',
 ]
 
 
@@ -145,8 +145,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",
     "http://127.0.0.1:8000",
-    "http://10.195.227.158:5173",
-    "http://10.195.227.158:5174",
+    "http://10.56.145.158:5173",
+    "http://10.56.145.158:5174",
 ]
 CORS_ALLOW_CREDENTIALS = True
 MEDIA_URL = '/media/'

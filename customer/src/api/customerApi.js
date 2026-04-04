@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE = "http://10.195.227.158:8000";
+const API_BASE = "http://10.56.145.158:8000";
 
 export const fetchRestaurantMenu = async (restaurantId) => {
   const response = await axios.get(

@@ -5,7 +5,7 @@ export default function QRGeneratorPage() {
   const [restaurantId, setRestaurantId] = useState("");
   const [tableNumber, setTableNumber] = useState("");
 
-  const baseUrl = "http://10.195.227.158:5173";
+  const baseUrl = "http://10.56.145.158:5173";
 
   const menuUrl =
     restaurantId && tableNumber

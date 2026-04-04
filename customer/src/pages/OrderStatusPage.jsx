@@ -21,7 +21,7 @@ export default function OrderStatusPage() {
 
     const fetchStatus = async () => {
       try {
-        const res = await axios.get(`http://10.195.227.158:8000/api/orders/${orderId}/`);
+        const res = await axios.get(`http://10.56.145.158:8000/api/orders/${orderId}/`);
         console.log("Initial status fetch:", res.data.status);
         processStatusUpdate(res.data.status);
       } catch (err) {
@@ -32,7 +32,7 @@ export default function OrderStatusPage() {
     const connectWS = () => {
       if (retryCount >= maxRetries) return;
 
-      const wsUrl = `ws://10.195.227.158:8000/ws/restaurant/${restaurantId}/orders/`;
+      const wsUrl = `ws://10.56.145.158:8000/ws/restaurant/${restaurantId}/orders/`;
       console.log(`Connecting to WebSocket: ${wsUrl}`);
       socket = new WebSocket(wsUrl);
 
@@ -95,7 +95,7 @@ export default function OrderStatusPage() {
   const submitRating = async (val) => {
     try {
       setRating(val);
-      await axios.patch(`http://10.195.227.158:8000/api/orders/${orderId}/review/`, {
+      await axios.patch(`http://10.56.145.158:8000/api/orders/${orderId}/review/`, {
         rating: val
       });
       setHasRated(true);

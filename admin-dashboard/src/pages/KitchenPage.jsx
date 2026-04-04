@@ -31,7 +31,7 @@ export default function KitchenPage() {
     const timer = setInterval(() => setNow(new Date()), 30000);
 
     if (!restaurantId) return;
-    const wsUrl = `ws://10.195.227.158:8000/ws/restaurant/${restaurantId}/orders/`;
+    const wsUrl = `ws://10.56.145.158:8000/ws/restaurant/${restaurantId}/orders/`;
     const socket = new WebSocket(wsUrl);
 
     socket.onmessage = (event) => {

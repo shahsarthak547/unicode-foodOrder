@@ -38,7 +38,7 @@ export default function OrdersPage() {
 
     // 2. Setup WebSocket for real-time order tracking
     if (!restaurantId) return;
-    const wsUrl = `ws://10.195.227.158:8000/ws/restaurant/${restaurantId}/orders/`;
+    const wsUrl = `ws://10.56.145.158:8000/ws/restaurant/${restaurantId}/orders/`;
     const socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
